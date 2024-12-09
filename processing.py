@@ -1,12 +1,12 @@
-import cv2
-import pyautogui
-import numpy as np
-from PIL import ImageGrab
 import time
+
+import cv2
 import keyboard
+import numpy as np
+import pyautogui
+from PIL import ImageGrab
 
 FISH = (1116, 595, 1117, 721)
-PLAYER = (1135, 595, 1139, 723)
 
 
 def get_indicator(region):
@@ -21,22 +21,6 @@ def save_debug_image(region, file_name):
     screen = np.array(ImageGrab.grab(bbox=region))
     # Сохранение изображения
     cv2.imwrite(file_name, cv2.cvtColor(screen, cv2.COLOR_BGR2GRAY))
-
-
-def filter_color(image, lower_color, upper_color):
-    # Преобразование в HSV (удобно для работы с цветами)
-    # hsv = cv2.cvtColor(image, cv2.COLOR_RGB2HSV)
-    mask = cv2.inRange(image, lower_color, upper_color)  # Маска цвета
-    return mask
-
-
-def find_lowest_pixel(mask):
-    coordinates = cv2.findNonZero(mask)  # Все пиксели, соответствующие маске
-    if coordinates is not None:
-        # Найти максимальную координату Y
-        lowest_pixel = max(coordinates, key=lambda x: x[0][1])
-        return lowest_pixel[0][1]  # Возврат координаты Y
-    return None
 
 
 def action(key_last='a', key_new='d'):
@@ -81,13 +65,6 @@ def fishing():
             break
 
 
-
-
-
-
-
-
-
 def find_brightest_pixel(image):
     # Поиск яркости вдоль вертикальной линии
     max_intensity = np.max(image)  # Максимальная яркость
@@ -98,21 +75,23 @@ def find_brightest_pixel(image):
         return None, None
 
 
-
-if __name__ == '__main__':
+def main():
     while True:
         if keyboard.is_pressed(']'):
             while True:
-                fishing()
-                print('Конец рыбалки')
-                time.sleep(7)
                 pyautogui.press('f')
-
-
                 while True:
                     max_y, max_intensity = find_brightest_pixel(get_indicator(FISH))
                     print(max_y, max_intensity)
                     if max_y:
-                        pyautogui.press('q')
-                        break
+                        if 0 < max_y < 5:
+                            pyautogui.press('q')
+                            fishing()
+                            print('Конец рыбалки')
+                            time.sleep(5)
+                            break
 
+
+
+if __name__ == '__main__':
+    main()
